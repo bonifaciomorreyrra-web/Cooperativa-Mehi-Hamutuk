@@ -7,7 +7,8 @@ const requireAdmin = authorize('admin', 'president');
 // Public: get published posts
 router.get('/', async (req, res) => {
   try {
-    const posts = await findAll('news', [['published', '==', true]], 'created_at', true);
+    const all = await findAll('news', [['published', '==', true]]);
+    const posts = all.sort((a, b) => (b.created_at > a.created_at ? 1 : -1));
     res.json(posts);
   } catch (e) {
     console.error(e);
@@ -18,7 +19,8 @@ router.get('/', async (req, res) => {
 // Admin: get all posts (including drafts)
 router.get('/all', authenticate, requireAdmin, async (req, res) => {
   try {
-    const posts = await findAll('news', [], 'created_at', true);
+    const all = await findAll('news');
+    const posts = all.sort((a, b) => (b.created_at > a.created_at ? 1 : -1));
     res.json(posts);
   } catch (e) {
     res.status(500).json({ error: 'Erru hetan notísias' });
