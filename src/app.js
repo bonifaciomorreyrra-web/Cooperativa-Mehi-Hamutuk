@@ -22,6 +22,7 @@ app.use('/api/loans', require('./routes/loans'));
 app.use('/api/investors', require('./routes/investors'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/news', require('./routes/news'));
 
 app.get('/api/health', (_, res) =>
   res.json({ status: 'ok', app: 'KMH Backend', version: '2.0.0', db: 'firestore' })
