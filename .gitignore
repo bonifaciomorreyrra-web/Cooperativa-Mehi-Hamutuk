@@ -1,0 +1,7 @@
+node_modules/
+.env
+.env.local
+serviceAccountKey.json
+service_account_b64.txt
+kmh.db
+*.db
