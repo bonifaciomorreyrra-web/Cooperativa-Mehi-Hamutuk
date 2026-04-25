@@ -158,15 +158,16 @@ router.post('/:id/photo', upload.single('photo'), async (req, res) => {
   }
 });
 
-// DELETE /api/members/:id (deactivate)
+// DELETE /api/members/:id
 router.delete('/:id', authorize('admin', 'president'), async (req, res) => {
   try {
     const member = await getById('members', req.params.id);
     if (!member) return res.status(404).json({ error: 'Membru la hetan' });
-    await update('members', req.params.id, { status: 'inactive' });
-    await update('users', member.user_id, { is_active: false });
-    res.json({ message: 'Membru deativa ho susesu' });
+    await remove('members', req.params.id);
+    if (member.user_id) await remove('users', member.user_id).catch(() => {});
+    res.json({ message: 'Membru hamoos ho susesu' });
   } catch (err) {
+    console.error('Delete member error:', err);
     res.status(500).json({ error: 'Erru iha servidor' });
   }
 });
