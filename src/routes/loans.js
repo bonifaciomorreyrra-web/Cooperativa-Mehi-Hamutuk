@@ -1,6 +1,6 @@
 'use strict';
 const express = require('express');
-const { findOne, findAll, getById, add, update, nextCounter } = require('../db/firestore');
+const { findOne, findAll, getById, add, update, remove, nextCounter } = require('../db/firestore');
 const { authenticate, authorize } = require('../middleware/auth');
 
 const router = express.Router();
@@ -236,6 +236,39 @@ router.post('/:id/repayment', authorize('admin', 'president'), async (req, res) 
     res.status(201).json({ message: 'Pagamentu rejista ho susesu' });
   } catch (err) {
     console.error('Repayment error:', err);
+    res.status(500).json({ error: 'Erru iha servidor' });
+  }
+});
+
+// PUT /api/loans/:id — edit loan (admin)
+router.put('/:id', authorize('admin', 'president'), async (req, res) => {
+  try {
+    const loan = await getById('loans', req.params.id);
+    if (!loan) return res.status(404).json({ error: 'Empréstimu la hetan' });
+    const { amount, duration_months, purpose, collateral, guarantor_name, guarantor_phone, status } = req.body;
+    const patch = {};
+    if (amount !== undefined) patch.amount = parseFloat(amount);
+    if (duration_months !== undefined) patch.duration_months = parseInt(duration_months);
+    if (purpose !== undefined) patch.purpose = purpose;
+    if (collateral !== undefined) patch.collateral = collateral;
+    if (guarantor_name !== undefined) patch.guarantor_name = guarantor_name;
+    if (guarantor_phone !== undefined) patch.guarantor_phone = guarantor_phone;
+    if (status !== undefined) patch.status = status;
+    await update('loans', req.params.id, patch);
+    res.json({ message: 'Empréstimu atualiza ho susesu' });
+  } catch (err) {
+    res.status(500).json({ error: 'Erru iha servidor' });
+  }
+});
+
+// DELETE /api/loans/:id — delete loan (admin)
+router.delete('/:id', authorize('admin', 'president'), async (req, res) => {
+  try {
+    const loan = await getById('loans', req.params.id);
+    if (!loan) return res.status(404).json({ error: 'Empréstimu la hetan' });
+    await remove('loans', req.params.id);
+    res.json({ message: 'Empréstimu hamoos ho susesu' });
+  } catch (err) {
     res.status(500).json({ error: 'Erru iha servidor' });
   }
 });

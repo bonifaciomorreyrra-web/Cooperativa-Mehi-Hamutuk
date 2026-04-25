@@ -1,6 +1,6 @@
 'use strict';
 const express = require('express');
-const { findAll, getById, add, update, nextCounter } = require('../db/firestore');
+const { findAll, getById, add, update, remove, nextCounter } = require('../db/firestore');
 const { authenticate, authorize } = require('../middleware/auth');
 
 const router = express.Router();
@@ -69,6 +69,18 @@ router.put('/:id', async (req, res) => {
     if (status !== undefined) patch.status = status;
     await update('investors', req.params.id, patch);
     res.json({ message: 'Investidor atualiza ho susesu' });
+  } catch (err) {
+    res.status(500).json({ error: 'Erru iha servidor' });
+  }
+});
+
+// DELETE /api/investors/:id
+router.delete('/:id', authorize('admin', 'president'), async (req, res) => {
+  try {
+    const inv = await getById('investors', req.params.id);
+    if (!inv) return res.status(404).json({ error: 'Investidor la hetan' });
+    await remove('investors', req.params.id);
+    res.json({ message: 'Investidor hamoos ho susesu' });
   } catch (err) {
     res.status(500).json({ error: 'Erru iha servidor' });
   }
