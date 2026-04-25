@@ -8,8 +8,21 @@ const morgan = require('morgan');
 const app = express();
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+const ALLOWED_ORIGINS = [
+  process.env.FRONTEND_URL,
+  'https://cooperative-mehi-hamutuk.web.app',
+  'https://cooperative-mehi-hamutuk.firebaseapp.com',
+  'capacitor://localhost',     // Android Capacitor
+  'ionic://localhost',         // iOS Capacitor (older)
+  'http://localhost',          // iOS Capacitor (newer)
+  'http://localhost:3000',     // local dev
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || true,
+  origin: (origin, cb) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    cb(null, true); // allow all for now; tighten in production if needed
+  },
   credentials: true
 }));
 app.use(express.json());
